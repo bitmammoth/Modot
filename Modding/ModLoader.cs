@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 
 using Godot.Utility;
 using Godot.Utility.Extensions;
+using System;
 
 namespace Godot.Modding
 {
@@ -177,6 +178,74 @@ namespace Godot.Modding
             return sortedMetadataIds?
                 .Select(filteredMetadata.GetValueOrDefault)
                 .NotNull() ?? ModLoader.SortModMetadata(ModLoader.FilterModMetadata(filteredMetadata));
+        }
+        
+    }
+    public static partial class EnumerableExtensions
+    {
+        /// <summary>
+        /// Filters all elements from <paramref name="source"/> that are not <see langword="null"/>.
+        /// </summary>
+        /// <param name="source">The <see cref="IEnumerable{T}"/> to search in.</param>
+        /// <typeparam name="T">The <see cref="Type"/> of element in <paramref name="source"/>.</typeparam>
+        /// <returns>An <see cref="IEnumerable{T}"/> of all non-<see langword="null"/> elements from <paramref name="source"/>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> is <see langword="null"/>.</exception>
+        [Pure]
+        public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> source)
+        {
+            return source.Where(element => element is not null)!;
+        }
+    }
+    public static partial class EnumerableExtensions
+    {
+        /// <summary>
+        /// Executes <paramref name="function"/> over every item in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The <see cref="IEnumerable{T}"/> of items to execute <paramref name="function"/> on.</param>
+        /// <param name="function">The <see cref="Action{T}"/> to invoke for each item in <paramref name="source"/>.</param>
+        /// <typeparam name="T">The <see cref="Type"/> of item in <paramref name="source"/>.</typeparam>
+        /// <exception cref="ArgumentNullException">Thrown if either <paramref name="source"/> or <paramref name="function"/> is <see langword="null"/>.</exception>
+        public static void ForEach<T>(this IEnumerable<T> source, Action<T> function)
+        {
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+            if (function is null)
+            {
+                throw new ArgumentNullException(nameof(function));
+            }
+            
+            foreach (T item in source)
+            {
+                function.Invoke(item);
+            }
+        }
+        
+        /// <summary>
+        /// Executes <paramref name="function"/> over every item in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The <see cref="IEnumerable{T}"/> of items to execute <paramref name="function"/> on.</param>
+        /// <param name="function">The function to invoke for each item and its index in <paramref name="source"/>.</param>
+        /// <typeparam name="T">The <see cref="Type"/> of item in <paramref name="source"/>.</typeparam>
+        /// <exception cref="ArgumentNullException">Thrown if either <paramref name="source"/> or <paramref name="function"/> is <see langword="null"/>.</exception>
+        public static void ForEach<T>(this IEnumerable<T> source, Action<T, int> function)
+        {
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+            if (function is null)
+            {
+                throw new ArgumentNullException(nameof(function));
+            }
+            
+            int index = 0;
+            foreach (T item in source)
+            {
+                function.Invoke(item, index);
+                index += 1;
+            }
         }
     }
 }
